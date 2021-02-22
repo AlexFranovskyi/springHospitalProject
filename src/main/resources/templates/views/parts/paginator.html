@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:insert="views/parts/common :: header"></div>
+	
+<div th:fragment=pagination>
+	<ul class="pagination">
+	
+   		<li class="page-item disabled">
+     			<a class="page-link" href="#" tabindex="-1" th:text="#{pages}"></a>
+   		</li>
+   		<th:block th:each="p : ${T(ua.hospital.springapp.support.PaginationSortingHelper).calculateNumbers(page.getNumber(), page.getTotalPages())}">
+   			<li th:if="${p - 1 == page.getNumber()}" class="page-item active">
+      			<a class="page-link" href="#" tabindex="-1" th:text="${p}"></a>
+    		</li>
+  				<li th:if="${p == -1}" class="page-item disabled">
+	    		<a class="page-link" href="#" tabindex="-1">...</a>
+    		</li>
+    		<li th:if="${p - 1 != page.getNumber() && p != -1}"class="page-item">
+      			<a class="page-link" th:href="@{__${#httpServletRequest.requestURL}__(page=${p-1},sort=${page.getSort().iterator().next().getProperty()})}" tabindex="-1" th:text="${p}"></a>
+    		</li>
+   		</th:block>
+   	</ul>
+</div>
+
+<div th:insert="views/parts/common :: footer"></div>

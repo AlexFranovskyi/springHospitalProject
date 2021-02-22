@@ -1,12 +1,14 @@
 package ua.hospital.springapp.controller;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import ua.hospital.springapp.model.dto.DoctorDto;
+import ua.hospital.springapp.model.dto.UserDto;
 import ua.hospital.springapp.model.entity.Doctor;
 import ua.hospital.springapp.model.entity.Person;
 import ua.hospital.springapp.model.entity.Role;
@@ -43,14 +47,15 @@ public class UserController {
 		return "views/loginForm";
 	}
 	
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@GetMapping("user_registration_form")
-	String userRegistrationForm() {
+	public String userRegistrationForm() {
 		return "views/userRegistrationForm";
 	}
 	
-	@Secured("ADMIN")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@PostMapping("register_user")
-	String registerUser(Model model,
+	public String registerUser(Model model,
 			@RequestParam("firstNameEn") String firstNameEn,
 			@RequestParam("firstNameUk") String firstNameUk,
 			@RequestParam("lastNameEn") String lastNameEn,
@@ -80,7 +85,7 @@ public class UserController {
 				.birthDate(birthDate)
 				.build();
 		User user = User.builder()
-				.role(role)
+				.roles(Collections.singleton(role))
 				.person(person)
 				.username(login)
 				.password(password)
@@ -93,6 +98,79 @@ public class UserController {
 		logger.info("Could not create new account");
 		model.addAttribute("message", "userRegistrationFailed");
 		return "views/userRegistrationForm";
+	}
+	
+	@GetMapping("profile_own")
+	public String profileOwn(Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication.getName();
+		
+		Optional<DoctorDto> optionalDoctor = Optional.empty();
+		if (authentication.getAuthorities().contains(Role.DOCTOR)) {
+			optionalDoctor = doctorService.findByUserUsername(username);
+		}
+		if(optionalDoctor.isPresent()) {
+			logger.info("Doctor is found and sent");
+			logger.info( optionalDoctor.get());
+			model.addAttribute("doctor", optionalDoctor.get());
+			model.addAttribute("user", optionalDoctor.get().getUserDto());
+			model.addAttribute("person", optionalDoctor.get().getUserDto().getPersonDto());
+			return "views/profile";			
+		}
+		
+		Optional<UserDto> optionalUser = Optional.empty();
+		if (!authentication.getAuthorities().contains(Role.DOCTOR)) {
+			optionalUser = userService.findByUsername(username);
+		}
+		
+		if(optionalUser.isPresent()) {
+			logger.info("User is found and sent");
+			logger.info( optionalUser.get());
+			model.addAttribute("user", optionalUser.get());
+			model.addAttribute("person", optionalUser.get().getPersonDto());
+			return "views/profile";
+		}
+		
+		logger.error("Some error occured while entity searching");
+		model.addAttribute("message", "dataMissing");
+		return "error/errorMessage";
+	}
+	
+	@GetMapping("profile")
+	public String profile(Model model,
+			@RequestParam int userId,
+			@RequestParam Role userRole) {		
+		
+		Optional<DoctorDto> optionalDoctor = Optional.empty();
+		if (userRole == Role.DOCTOR) {
+			optionalDoctor = doctorService.findById(userId);
+		}
+		
+		if(optionalDoctor.isPresent()) {
+			logger.info("Doctor is found and sent");
+			logger.info( optionalDoctor.get());
+			model.addAttribute("doctor", optionalDoctor.get());
+			model.addAttribute("user", optionalDoctor.get().getUserDto());
+			model.addAttribute("person", optionalDoctor.get().getUserDto().getPersonDto());
+			return "views/profile";			
+		}
+		
+		Optional<UserDto> optionalUser = Optional.empty();
+		if (userRole != Role.DOCTOR) {
+			optionalUser = userService.findById(userId);
+		}
+		
+		if(optionalUser.isPresent()) {
+			logger.info("User is found and sent");
+			logger.info( optionalUser.get());
+			model.addAttribute("user", optionalUser.get());
+			model.addAttribute("person", optionalUser.get().getPersonDto());
+			return "views/profile";
+		}
+		
+		logger.error("Some error occured while entity searching");
+		model.addAttribute("message", "dataMissing");
+		return "error/errorMessage";
 	}
 	
 

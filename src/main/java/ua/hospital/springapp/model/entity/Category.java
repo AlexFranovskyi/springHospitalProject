@@ -1,11 +1,11 @@
 package ua.hospital.springapp.model.entity;
 
-import java.util.Set;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sun.istack.NotNull;
 
@@ -21,6 +21,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"nameEn", "nameUk"})
+})
 public class Category {
 	
 	@Id
@@ -33,6 +36,11 @@ public class Category {
 	@NotNull
 	private String nameUk;
 	
+	public Category(String nameEn, String nameUk) {
+		this.nameEn = nameEn;
+		this.nameUk = nameUk;
+	}
+	
 	@Override
 	public String toString() {
 		return new StringBuilder("id: ")
@@ -42,6 +50,16 @@ public class Category {
 				.append(", nameUk: ")
 				.append(nameUk)
 				.toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Category) {
+			Category category = (Category)obj;
+			return this.id == category.getId() && this.nameEn == category.getNameEn() 
+					&& this.nameUk == category.getNameUk();			
+		}
+		return super.equals(obj);
 	}
 
 }

@@ -1,10 +1,12 @@
 package ua.hospital.springapp.model.entity;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -41,20 +44,21 @@ public class User implements UserDetails {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	
-	@NotNull
+	@ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+	@CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
 	@Enumerated(EnumType.STRING)
-	private Role role;
+	private Set<Role> roles;
 	
 	public boolean isAdmin() {
-		return role == Role.ADMIN;
+		return roles.contains(Role.ADMIN);
 	}
 	
 	public boolean isDoctor() {
-		return role == Role.DOCTOR;
+		return roles.contains(Role.DOCTOR);
 	}
 	
 	public boolean isNurse() {
-		return role == Role.NURSE;
+		return roles.contains(Role.NURSE);
 	}
 	
 	@NotNull
@@ -69,7 +73,7 @@ public class User implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return new ArrayList<>(java.util.Arrays.asList(role));
+		return roles;
 	}
 
 	@Override

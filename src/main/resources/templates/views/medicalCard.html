@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:insert="views/parts/common :: header"></div>
+
+	<div class="mb-5" th:insert="views/parts/navbar :: navbar"></div>
+	
+	<div class="container">
+	
+		<h2 th:if="${message != null}" th:text="#{${message}}"></h2>
+		
+			<div class="mb-4"><h3 th:text="#{medicalCard}"></h3></div>
+			<div class="row mt-3" th:with="person=${patient.getPersonDto()}">
+				<div class="col">
+					<b th:text="#{patientName} + ':'"></b>
+					<span th:text="${#locale.toString()=='uk_UA'} ? 
+						${person.lastNameUk + ' ' + person.firstNameUk} : ${person.lastNameEn + ' ' + person.firstNameEn}">
+					</span>
+				</div>
+				
+				<div class="col">
+					<b th:text="#{birthDate} + ':'"></b> 
+					<span th:text="${#temporals.format(person.birthDate, 'MM-dd-yyyy')}"></span>
+				</div>
+				<div class="col"></div>
+			</div>
+			
+			<div class="row mt-3 d-flex align-items-center">
+				<div class="col-4">
+					<b th:text="#{arriveTime} + ':'"></b>
+					<span th:text="${#temporals.format(patient.arriveDateTime, 'MM-dd-yyyy HH:mm')}"></span>
+				</div>
+				<div class="col-4"><b th:text="#{dischargeTime} + ':'"></b> 
+					<span th:if="${patient.dischargeDateTime == null}" th:text="${patient.dischargeDateTime == null} ? 
+								#{notDischarged} : ${#temporals.format(patient.dischargeDateTime, 'MM-dd-yyyy HH:mm')}"></span>
+				</div>
+				<div class="col-4">
+					<form sec:authorize="hasRole('DOCTOR')"
+        					th:if="${patient.dischargeDateTime == null && #authentication.name == patient.doctorDto?.getUserDto()?.username}"
+        						action="discharge_patient" method="post">
+        						
+        				<input type="hidden" name="patientId" th:value="${patient.id}">
+	        			<div class="form-group my-2">
+			            	<button type="submit" class="btn btn-success" th:text="${dischargePatient}"></button>
+		           		</div>
+        			</form>
+				</div>
+			</div>
+			
+			<div class="row mt-3 d-flex align-items-center">
+				<div class="col-4">
+					<b th:text="#{doctorName} + ':'"></b>
+					<span th:if="${doctor == null}" th:text="#{notAssigned}"></span>
+					<span th:if="${patient.getDoctorDto() != null}" th:with="person=${patient.getDoctorDto().getUserDto().getPersonDto()}"
+							th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' '
+							 	+ person.firstNameUk} : ${person.lastNameEn + ' ' + person.firstNameEn}">
+					</span>
+				</div>
+				<div class="col-4">
+					<form sec:authorize="hasRole('ADMIN')" th:if="${patient.dischargeDateTime == null}" action="doctor_list" method="get">
+	           			<input type="hidden" name="patientId" th:value="${patient.id}">
+	        			<div class="form-group my-2">
+			            	<button type="submit" class="btn btn-primary"
+			            		th:text="${patient.getDoctorDto() == null} ? #{assignDoctor} : #{reassignDoctor}">
+			            	</button>
+		           		</div>
+        			</form>
+				</div>
+			</div>
+			
+			<div class="row mt-3 d-flex align-items-center">
+				<div class="col-4">
+					<b th:text="#{diagnosis} + ':'"></b>
+					<span th:if="${patient.diagnosisEn != null}" th:text="${#locale.toString()=='uk_UA'} 
+									? ${patient.diagnosisUk} : ${patient.diagnosisEn}"></span>
+									
+					<span th:if="${patient.diagnosisEn == null}" th:text="#{notDefined}" /></span>
+				</div>
+				<div class="col">
+					<th:block th:if="${patient.getDoctorDto() != null && patient.dischargeDateTime == null 
+								&& #authentication.name == patient.getDoctorDto().getUserDto().username}">
+	        			<a class="btn btn-info" data-toggle="collapse" href="#collapseExample" role="button" 
+	        				aria-expanded="false" aria-controls="collapseExample" th:text="${defineDiagnosis}">
+					  	</a>
+						<div class="collapse" id="collapseExample">
+							<div class="form-group mt-3">
+						    	<form method="post" action="define_diagnosis">
+						    		<input type="hidden" name="patientId" th:value="${patient.id}">
+						    		<label for="diagnosisEn" th:text="#{enterEnglish}"></label>
+						    		<div class="form-group mb-3 w-50">
+						            	<input type="text" class="form-control" name="diagnosisEn" required pattern="[A-Z][a-z\d\s,-]*" />
+						    		</div>
+						    		<label for="diagnosisUk" th:text="${enterUkrainian}"></label>
+						            <div class="form-group mb-3 w-50">
+						            	<input type="text" class="form-control" name="diagnosisUk" required pattern="[À-ß²¯ª¥][à-ÿ³¿º´\d\s,-]*"/>
+						    		</div>
+						    		<div class="form-group my-2">
+							            <button type="submit" class="btn btn-success" th:text="#{send}"></button>
+						            </div>
+						        </form>
+						    </div>
+						</div>
+        			</th:block>
+				</div>
+				
+			</div>
+			
+			<div class="mt-4 mb-3"><h4 th:text="#{prescriptions}"></h4></div>
+			
+			<table class="table table-striped ">
+			  <thead>
+			    <tr>
+			      <th scope="col" th:text="#{description}"></th>
+			      <th scope="col" th:text="#{type}"></th>
+			      <th scope="col" th:text="#{completionTime}"></th>
+			      <th scope="col" th:text="#{actions}"></th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			   			  
+	   			 <th:block th:each="prescription : ${patient.getPrescriptions()}">	   			 
+			    	<tr>
+			    	  <td class="align-middle" th:text="${#locale.toString()=='uk_UA'} ? ${prescription.descriptionUk} 
+			    	  										: ${prescription.descriptionEn}"></td>
+				      <td class="align-middle" th:text="${#strings.toLowerCase(prescription.type)}"></td>
+				      <td class="align-middle" th:text="${prescription.completionTime != null}
+				      						? ${#temporals.format(prescription.completionTime, 'MM-dd-yyyy HH:mm')} : #{notCompleted}">
+				      </td>
+				      
+				      <td class="align-middle">
+				      	<div class="form-row">
+				      	<th:block th:if="${!(#authentication.expression('hasRole(''NURSE'')') && prescription.type == 'OPERATION') 
+				      						&& #authentication.expression('hasAnyRole(''NURSE', 'DOCTOR'')')}">
+				    	  	<form th:if="${prescription.completionTime == null && patient.dischargeDateTime == null}" 
+				    	  				action="complete_prescription" method="post">
+				    	  		<input type="hidden" name="patientId" th:value="${patient.id}">
+			           			<input type="hidden" name="prescriptionId" th:value="${prescription.id}">
+			           			<input type="hidden" name="prescriptionType" th:value="${prescription.type}">
+			        			<div class="form-group my-2 mr-3">
+					            	<button type="submit" class="btn btn-success" th:text="${complete}"></button>
+				           		</div>
+		        			</form>
+		        			<form sec:authorize="${hasRole('DOCTOR')}" th:if="${prescription.completionTime == null
+		        					&& patient.dischargeDateTime == null 
+		        						&& #authentication.name == patient.getDoctorDto()?.getUserDto().username}" 
+		        							action="delete_prescription" method="post">
+		        				<input type="hidden" name="patientId" th:value="${patient.id}">
+			           			<input type="hidden" name="prescriptionId" th:value="${prescription.id}">
+			        			<div class="form-group my-2">
+					            	<button type="submit" class="btn btn-danger" th:text="#{delete}"></button>
+				           		</div>
+		        			</form>
+				      	</th:block>
+				      	</div>
+				      </td>
+				  	</tr>
+   				</th:block>
+			   </tbody>
+			</table>
+			
+			<div sec:authorize="hasRole('DOCTOR')" th:if="${patient.dischargeDateTime == null 
+									&& #authentication.name == patient.doctorDto?.userDto?.username}">
+       			<a class="btn btn-primary" data-toggle="collapse" href="#collapseOne" role="button" 
+       						aria-expanded="false" aria-controls="collapseExample" th:text="${addPrescription}">
+			  	</a>
+				<div class="collapse" id="collapseOne">
+					<div class="form-group mt-3">
+				    	<form method="post" action="create_prescription">
+				    		<input type="hidden" name="patientId" th:value="${patient.id}">
+				    		<label for="descriptionEn" th:text="#{enterEnglish}"></label>
+				    		<div class="form-group mb-3 w-50">
+				            	<input type="text" class="form-control" name="descriptionEn" required />
+				    		</div>
+				    		<label for="descriptionUk" th:text="#{enterUkrainian}"></label>
+				            <div class="form-group mb-3 w-50">
+				            	<input type="text" class="form-control" name="descriptionUk" required />
+				    		</div>
+				    		<label for="prescriptionType" th:text="#{chooseType}"></label>
+				            <div class="form-group mb-3 w-25">
+					    		<select name="prescriptionType" class="form-control">
+		        					<option value="DRUGS" th:text="#{drugs}"></option>
+		        					<option value="PROCEDURE" th:text="#{procedure}"></option>
+		        					<option value="OPERATION" th:text="#{operation}"></option>
+								</select>
+				    		</div>
+				    		
+				    		<div class="form-group my-2">
+					            <button type="submit" class="btn btn-primary" th:text="#{send}"></button>
+				            </div>
+				        </form>
+				    </div>
+				</div>
+			</div>
+			
+			<div class="mt-4"><h4 th:text="#{mealList}"></h4></div>				
+	    	<table class="table table-striped ">
+			  <thead>
+			    <tr>
+			      <th scope="col" th:text="meal"></th>
+			      <th scope="col" th:text="actions"></th>
+			    </tr>
+			  </thead>
+			  <tbody>
+	   			 
+		    	<tr th:each="meal : ${patient.getMeals()}">
+		    	  <td class="align-middle" th:text="${#locale.toString()=='uk_UA'} ? ${nameUk} : ${nameEn}"></td>
+			    
+				  <td class="align-middle">
+			    	<div class="btn" sec:authorize="hasRole('DOCTOR')" 
+			    				th:if="${#authentication.name == patient.doctorDto?.userDto?.username}">
+			    	  	<form action="remove_patient_meal" method="post">
+		           			<input type="hidden" name="mealId" th:value="${meal.id}">
+		           			<input type="hidden" name="patientId" th:value="${patient.id}">
+		        			<div class="form-group my-2">
+				            	<button type="submit" class="btn btn-warning" th:text="#{deleteMeal}"></button>
+			           		</div>
+	        			</form>
+		    		</div>
+				 </td>
+			  </tr>
+   				  
+		   </tbody>
+		</table>
+			
+			<div sec:authorize="hasRole('DOCTOR')" th:if="${#authentication.name == patient.doctorDto?.userDto?.username}">
+       			<div class="btn">
+		    	  	<form action="meal_list" method="post">
+	           			<input type="hidden" name="patientId" th:value="${patient.id}">
+	        			<div class="form-group my-2">
+			            	<button type="submit" class="btn btn-primary" th:text="${addMeal}"></button>
+		           		</div>
+        			</form>
+	    		</div>
+			</div>
+			
+	</div>		
+	
+<div th:insert="views/parts/common :: footer"></div>

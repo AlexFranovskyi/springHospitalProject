@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:insert="views/parts/common :: header"></div>
+
+	<div class="mb-5" th:insert="views/parts/navbar :: navbar"></div>
+		
+		
+	<div class="container">
+		<h2 th:if="${message != null}" th:text="#{${message}}"></h2>
+	</div>
+<div th:insert="views/parts/common :: footer"></div>

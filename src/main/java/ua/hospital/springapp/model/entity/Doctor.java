@@ -37,7 +37,7 @@ public class Doctor {
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private Category category;
 	
-	@Formula("(SELECT count(patient.id) FROM patient WHERE patient.doctor_id = id AND discharge_date_time IS NULL)")
+	@Formula("(SELECT count(patient.id) FROM patient WHERE patient.doctor_id = id AND patient.discharge_date_time IS NULL)")
 	private int patientAmount;
 	
 	public Doctor(User user) {

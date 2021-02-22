@@ -1,5 +1,7 @@
 package ua.hospital.springapp.model.service;
 
+import java.util.Optional;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +11,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import ua.hospital.springapp.model.dto.UserDto;
 import ua.hospital.springapp.model.entity.User;
 import ua.hospital.springapp.model.repository.UserRepository;
+import ua.hospital.springapp.support.EntityDtoConverter;
 
 @Service
 public class UserService implements UserDetailsService{
@@ -36,6 +40,15 @@ public class UserService implements UserDetailsService{
 			return false;
 		}
 		return true;
+	}
+	
+	public Optional<UserDto> findByUsername(String username){
+		return userRepository.findByUsername(username)
+				.map(EntityDtoConverter::UserToDto);
+	}
+	
+	public Optional<UserDto> findById(int userId){
+		return userRepository.findById(userId).map(EntityDtoConverter::UserToDto);
 	}
 
 }

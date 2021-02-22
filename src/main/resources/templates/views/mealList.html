@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:insert="views/parts/common :: header"></div>
+
+<div class="mb-5" th:insert="views/parts/navbar :: navbar"></div>
+		
+		<div class="container">
+			
+			<div><h2 th:if="${message != null}" th:text="#{${message}}"></h2></div>
+						
+			<div><h4 th:text="#{mealList}"></h4></div>				
+	    	<table class="table table-striped ">
+			  <thead>
+			    <tr>
+			      <th scope="col" th:text="#{meal}"></th>
+			      <th scope="col" th:text="#{actions}"></th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			  
+			    	<tr th:each="meal : ${mealList}">
+			    	  <td class="align-middle" th:text="${(#locale.toString()=='uk_UA') ? meal.nameUk : meal.nameEn}"></td>
+				    
+					  <td class="align-middle">
+					    	<div class="btn" role="group" sec:authorize="hasRole('DOCTOR')" th:if="${patientId != null}">
+					    	  	<form action="assign_patient_meal" method="post">
+				           			<input type="hidden" name="mealId" value="${meal.id}">
+				           			<input type="hidden" name="patientId" value="${patientId}">
+				        			<div class="form-group my-2">
+						            	<button type="submit" class="btn btn-success"> <fmt:message key="assignMeal" /> </button>
+					           		</div>
+			        			</form>
+				    		</div>
+				    	<th:block sec:authorize="hasRole('ADMIN')">
+				    		<div class="btn" role="group">
+					    		<a class="btn btn-info" data-toggle="collapse" th:href="'#collapse' + ${meal.id}" 
+					    					role="button" aria-expanded="false" aria-controls="collapseExample" th:text="#{updateMeal}">
+							  	</a>
+							  	
+								<div class="collapse" id="'#collapse' + ${meal.id}">
+									<div class="form-group">
+								    	<form method="post" action="update_meal">
+								    		<input type="hidden" name="mealId" th:value="${meal.id}">
+								    		<label for="nameEn" th:text="#{enterEnglish}"></label>
+								    		<div class="form-group mb-3 w-100">
+								            	<input type="text" class="form-control" name="nameEn" required pattern="[A-Z][a-z]*" />
+								    		</div>
+								    		<label for="nameUk" th:text="#{enterUkrainian}"></label>
+								            <div class="form-group mb-3">
+								            	<input type="text" class="form-control" name="nameUk" required pattern="[À-ß²¯ª¥][à-ÿ³¿º´]*"/>
+								    		</div>
+								    		<div class="form-group my-2">
+									            <button type="submit" class="btn btn-success" th:text="#{send}"></button>
+								            </div>
+								        </form>
+								    </div>
+								</div>
+							</div>
+					    	<div class="btn allign-top" role="group">
+					    	  	<form action="delete_meal" method="post">
+				           			<input type="hidden" name="mealId" th:value="${meal.id}">
+				        			<div class="form-group my-2">
+						            	<button type="submit" class="btn btn-danger" th:text="#{deleteMeal}"></button>
+					           		</div>
+			        			</form>
+				    		</div>
+						</th:block>
+					 </td>
+				  </tr>
+   				  
+			   </tbody>
+			</table>
+			
+			<div sec:authorize="hasRole('ADMIN')">
+       			<a class="btn btn-primary" data-toggle="collapse" href="#collapseOne" role="button" 
+       						aria-expanded="false" aria-controls="collapseExample" th:text="#{addMeal}">
+			  	</a>
+				<div class="collapse" id="collapseOne">
+					<div class="form-group mt-3">
+				    	<form method="post" action="create_meal">
+				    		<label for="nameEn" th:text="#{enterEnglish}"></label>
+				    		<div class="form-group mb-3 w-50">
+				            	<input type="text" class="form-control" name="nameEn" required />
+				    		</div>
+				    		<label for="nameUk" th:text="#{enterUkrainian}"></label>
+				            <div class="form-group mb-3 w-50">
+				            	<input type="text" class="form-control" name="nameUk" required />
+				    		</div>					    		
+				    		<div class="form-group my-2">
+					            <button type="submit" class="btn btn-success" th:text="#{send}"></button>
+				            </div>
+				        </form>
+				    </div>
+				</div>
+			</div>
+					
+		</div>
+		
+<div th:insert="views/parts/common :: footer"></div>

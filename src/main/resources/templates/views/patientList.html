@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:insert="views/parts/common :: header"></div>
+
+<div class="mb-5" th:insert="views/parts/navbar :: navbar"></div>
+	
+	<div class="container">
+		
+		<div><h2 th:if="${message != null}" th:text="#{${message}}"></h2></div>
+		
+		
+			<div><h4 th:text="#{patientList}"></h4></div>				
+	    	<table class="table table-striped ">
+			  <thead>
+			    <tr>
+			      <th scope="col" th:text="#{patientName}"></th>
+			      <th scope="col" th:text="#{birthDate}"></th>
+			      <th scope="col" th:text="#{arriveTime}"></th>
+			      <th scope="col" th:text="#{dischargeTime}"></th>
+			      <th scope="col" th:text="#{diagnosis}"></th>
+			      <th scope="col" th:text="#{doctorName}"></th>
+			    </tr>
+			  </thead>
+			  <tbody>
+	   			 
+		    	<tr th:each="patient : ${page.toList()}">
+		    	  <td class="align-middle">
+		    	  	<a th:href="@{/patient_get(patientId=${patient.id})}" th:with="person=${patient.getPersonDto()}"> 
+		    	  		<span th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' ' + person.firstNameUk} 
+								: ${person.lastNameEn + ' ' + person.firstNameEn}"></span>
+		    	  	</a>
+		    	  </td>
+			      <td class="align-middle" th:text="${#temporals.format(patient.getPersonDto().birthDate, 'MM-dd-yyyy')}"></td>
+			      <td class="align-middle" th:text="${#temporals.format(patient.arriveDateTime, 'MM-dd-yyyy HH:mm')}"></td>
+			      
+			      <td class="align-middle" th:text="${patient.dischargeDateTime != null} ? ${#temporals.format(patient.dischargedDateTime, 'MM-dd-yyyy HH:mm')}
+			      			: #{notDischarged}"></td>
+			      			
+			      <td class="align-middle" th:with="diagnosis=${(#locale.toString()=='uk_UA') ? (patient.diagnosisUk) : (patient.diagnosisEn)}">
+			      	<span th:text="${diagnosis} ? ${diagnosis} : #{notDefined}"></span>
+			      </td>
+			      
+				  <td class="align-middle" th:with="doctor=${patient.getDoctorDto()}">
+		    	  	<form sec:authorize="hasRole('ADMIN')" th:if="${doctor == null && patient.dischargeDateTime == null}" action="doctor_list" method="get">
+	           			<input type="hidden" name="patientId" value="${patient.id}">
+	        			<div class="form-group my-2">
+			            	<button type="submit" class="btn btn-primary" th:text="assignDoctor" ></button>
+		           		</div>
+        			</form>
+        			
+		    		<a sec:authorize="hasRole('ADMIN')" th:if="${doctor != null}" th:with="person=${doctor.getUserDto().getPersonDto()}"
+		    		 	th:href="@{/profile?userId=${doctor.id}&userRole=doctor"}>
+		    		 	<span th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' ' + person.firstNameUk} 
+							: ${person.lastNameEn + ' ' + person.firstNameEn}"></span>
+		    		 </a>
+			    		 
+				    <th:block th:if="${!#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+				    	<span th:if="${doctor != null}" th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' ' + person.firstNameUk} 
+								: ${person.lastNameEn + ' ' + person.firstNameEn}"></span>
+						<span th:if="${doctor == null}" th:text="#{notAssigned}"></span> 
+				    </th:block>
+				    
+				 </td>
+			  	</tr>
+   				  
+			   </tbody>
+			</table>
+			
+			<div class="form-group row">
+				<div class="col">
+					<div th:if="${doctorId != null}" th:insert="views/parts/paginator :: pagination" th:with="extraParam=${doctorId}"></div>
+					<div th:if="${doctorId == null}" th:insert="views/parts/paginator :: pagination"></div>
+				</div>
+				
+				<div class="col">
+					<div class="float-right">
+						<div class="form-group">
+						    <form method="get" action="" class="form-inline"> 					        
+						    	<button type="submit" class="btn btn-primary mr-3" th:text="sorting"></button>
+						        <input th:if="${doctorId != null}" type="hidden" name="doctorId" th:value="${doctorId}" />
+						        <select name="sort" class="custom-select" th:with="nameLocalized=${'person.lastName' + #strings.toUpperCase(#strings.substring(#locale.toString, 0, 1)) + #strings.substring(#locale.toString, 1, 2)}">
+						    		<option th:value="${nameLocalized}" th:selected="${page.sort.iterator().next().getProperty() == nameLocalized}" th:text="#{lastName}"></option>
+						    		<option value="person.birthDate" th:selected="${page.sort.iterator().next().getProperty() == 'person.birthDate'}" th:text="#{birthDate}" ></option>
+								</select>
+						    </form>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+	</div>
+		
+<div th:insert="views/parts/common :: footer"></div>

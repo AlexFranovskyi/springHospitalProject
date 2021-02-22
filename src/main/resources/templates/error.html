@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+table td{
+vertical-align:top;
+border:solid 1px #888;
+padding:10px;
+}
+
+    </style>
+</head>
+<body>
+<h1 th:text="#{errorOccured}"></h1>
+<table>
+    <tr>
+        <td th:text="#{path}"></td>
+        <td th:text="${path}"/>
+    </tr>
+    <tr>
+        <td th:text="#{error}"></td>
+        <td th:text="${error}"/>
+    </tr>
+    <tr>
+        <td th:text="#{status}"></td>
+        <td th:text="${status}"/>
+    </tr>
+</table>
+</body>
+</html>

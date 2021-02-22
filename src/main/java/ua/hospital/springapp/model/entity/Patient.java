@@ -50,7 +50,7 @@ public class Patient {
 	
 	@Column(insertable = false, updatable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private LocalDateTime arriveTime;
+	private LocalDateTime arriveDateTime;
 	
 	@NotNull
 	private String diagnosisEn;
@@ -77,7 +77,7 @@ public class Patient {
 				.append(", person info: ")
 				.append(person)
 				.append("; arriving time: ")
-				.append(arriveTime)
+				.append(arriveDateTime)
 				.append("; diagnosis (en): ")
 				.append(diagnosisEn)
 				.append("; diagnosis (uk): ")

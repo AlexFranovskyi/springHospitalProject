@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:insert="views/parts/common :: header"></div>
+
+	<div class="mb-5" th:insert="views/parts/navbar :: navbar"></div>
+		
+	<div class="container">
+	
+		<h2 th:if="${message != null}" th:text="#{${message}}"></h2>
+		
+		<div class="mb-4"><h3 th:text="#{profile}"></h3></div>
+		<div class="row mt-3">
+			<div class="col-4">
+				<b th:text="#{fullName} + ':'"></b>
+				<span th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' ' + person.firstNameUk} 
+							: ${person.lastNameEn + ' ' + person.firstNameEn}"></span>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-3">
+				<b th:text="#{birthDate} + ':'" ></b>
+				<span th:text="${#temporals.format(person.birthDate, 'MM-dd-yyyy')}"></span>
+			</div>
+			<div class="col-3">
+				<b th:text="#{role} + ':'"></b>
+				<span th:if="${user.isAdmin()}" th:text="#{admin}"></span>
+				<span th:if="${user.isDoctor()}" th:text="#{doctor}"></span>
+				<span th:if="${user.isNurse()}" th:text="#{nurse}"></span>
+			</div>
+		</div>
+		
+		<div class="row mt-3 d-flex align-items-center" th:if="${doctor != null}">
+			<div class="col-3"><b th:text="category + ':'"></b>
+				<span th:if="${doctor.getCategoryDto() != null}" th:text="#{category}"></span>
+				<span th:if="${doctor.getCategoryDto() == null}" th:text="#{notAssigned}"></span>
+			</div>
+			<div class="col-3" sec:authorize="hasRole('ADMIN')">
+				<form th:action="category_list" method="get">
+           			<input type="hidden" name="doctorId" th:value="${doctor.id}">
+        			<div class="form-group my-2">
+		            	<button type="submit" class="btn btn-primary"> <span th:text="#{assignCategory}"></span></button>
+	           		</div>
+       			</form>
+			</div>
+		</div>
+		
+		<div class="row mt-3" th:if="${doctor != null}">
+			<div class="col">
+				<b th:text="#{patientAmount} + ':'"></b>
+				<span th:text="${doctor.patientAmount}"></span>
+			    <a th:href="@{/doctor_patients_list(doctorId=${doctor.id})}" th:text="#{list}"></a>
+			</div>
+		</div>
+							
+	</div>		
+	
+<div th:insert="views/parts/common :: footer"></div>

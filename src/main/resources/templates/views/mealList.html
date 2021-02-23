@@ -20,15 +20,15 @@
 			  <tbody>
 			  
 			    	<tr th:each="meal : ${mealList}">
-			    	  <td class="align-middle" th:text="${(#locale.toString()=='uk_UA') ? meal.nameUk : meal.nameEn}"></td>
+			    	  <td class="align-middle" th:text="${#locale.toString()=='uk_UA'} ? ${meal.nameUk} : ${meal.nameEn}"></td>
 				    
 					  <td class="align-middle">
 					    	<div class="btn" role="group" sec:authorize="hasRole('DOCTOR')" th:if="${patientId != null}">
-					    	  	<form action="assign_patient_meal" method="post">
-				           			<input type="hidden" name="mealId" value="${meal.id}">
-				           			<input type="hidden" name="patientId" value="${patientId}">
+					    	  	<form th:action="assign_patient_meal" method="post">
+				           			<input type="hidden" name="mealId" th:value="${meal.id}">
+				           			<input type="hidden" name="patientId" th:value="${patientId}">
 				        			<div class="form-group my-2">
-						            	<button type="submit" class="btn btn-success"> <fmt:message key="assignMeal" /> </button>
+						            	<button type="submit" class="btn btn-success" th:text="#{assignMeal}"></button>
 					           		</div>
 			        			</form>
 				    		</div>
@@ -38,9 +38,9 @@
 					    					role="button" aria-expanded="false" aria-controls="collapseExample" th:text="#{updateMeal}">
 							  	</a>
 							  	
-								<div class="collapse" id="'#collapse' + ${meal.id}">
+								<div class="collapse" th:id="'collapse' + ${meal.id}">
 									<div class="form-group">
-								    	<form method="post" action="update_meal">
+								    	<form method="post" th:action="update_meal">
 								    		<input type="hidden" name="mealId" th:value="${meal.id}">
 								    		<label for="nameEn" th:text="#{enterEnglish}"></label>
 								    		<div class="form-group mb-3 w-100">
@@ -58,7 +58,7 @@
 								</div>
 							</div>
 					    	<div class="btn allign-top" role="group">
-					    	  	<form action="delete_meal" method="post">
+					    	  	<form th:action="delete_meal" method="post">
 				           			<input type="hidden" name="mealId" th:value="${meal.id}">
 				        			<div class="form-group my-2">
 						            	<button type="submit" class="btn btn-danger" th:text="#{deleteMeal}"></button>
@@ -78,7 +78,7 @@
 			  	</a>
 				<div class="collapse" id="collapseOne">
 					<div class="form-group mt-3">
-				    	<form method="post" action="create_meal">
+				    	<form method="post" th:action="create_meal">
 				    		<label for="nameEn" th:text="#{enterEnglish}"></label>
 				    		<div class="form-group mb-3 w-50">
 				            	<input type="text" class="form-control" name="nameEn" required />

@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,13 +34,13 @@ public class PatientController {
 	@Autowired
 	PatientService patientService;
 	
-	@Secured("ADMIN")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@GetMapping("patient_registration_form")
 	public String patientRegistrationForm(){
 		return "views/patientRegistrationForm";
 	}
 	
-	@Secured("ADMIN")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@PostMapping("register_patient")
 	public String registerPatient(Model model,
 			@RequestParam("firstNameEn") String firstNameEn,
@@ -107,6 +107,7 @@ public class PatientController {
 		
 		if(optional.isPresent()) {
 			logger.info("Patient is found and sent");
+			logger.info(optional.get());
 			model.addAttribute("patient", optional.get());
 			return "views/medicalCard";
 		}
@@ -114,6 +115,110 @@ public class PatientController {
 		logger.error("Some error occured while patient entity searching");
 		model.addAttribute("message", "dataMissing");
 		return "error/errorMessage";
+	}
+	
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+	@PostMapping("assign_doctor")
+	public String doctorAssign(Model model,
+			@RequestParam int doctorId,
+			@RequestParam int patientId) {
+		
+		if (patientService.assignDoctor(patientId, doctorId)) {
+			logger.info("The doctor is assigned to the patient");
+			return new StringBuilder("redirect:/patient_get?patientId=")
+					.append(patientId).toString();
+		}
+		
+		logger.error("Some error occured while doctor assigning to patient");
+		model.addAttribute("message", "errorOccured");
+		return "error/errorMessage";
+	}
+	
+	@GetMapping("doctor_patients_list")
+	public String DoctorPatientsList(Model model,
+			@RequestParam int doctorId,
+			@PageableDefault(size = Constants.PAGE_SIZE) Pageable pageable) {
+		if(pageable.getSort().isEmpty()) {
+			String locale = LocaleContextHolder.getLocale().toString();
+			String lastNameEn= new StringBuilder("person.lastName")
+					.append(Character.toUpperCase(locale.charAt(0)))
+					.append(locale.charAt(1))
+					.toString();
+			
+			pageable = PageRequest.of(0, Constants.PAGE_SIZE, Sort.by(lastNameEn));
+		}
+		
+		Page<PatientDto> page = patientService.findByDoctorIdPaginated(doctorId, pageable);
+		logger.info(page.toList());
+		model.addAttribute("message", "doctorPatientsList");
+		model.addAttribute("doctorId", doctorId);
+		model.addAttribute("page", page);
+		return "views/patientList";
+	}
+	
+	@PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+	@PostMapping("define_diagnosis")
+	public String patientDiagnosis(Model model,
+			@RequestParam int patientId,
+			@RequestParam String diagnosisEn,
+			@RequestParam String diagnosisUk) {
+		
+		if (patientService.defineDiagnosis(patientId, diagnosisEn, diagnosisUk)) {
+			logger.info("The diagnosis is successfully defined to the Patient");
+			return new StringBuilder("redirect:/patient_get?patientId=")
+					.append(patientId).toString();
+		}
+		
+		logger.error("Some error occured while diagnosis defining to a patient");
+		model.addAttribute("message", "errorOccured");
+		return "error/errorMessage";
+	}
+	
+	@PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+	@PostMapping("assign_patient_meal")
+	public String patientMealAssign(Model model,
+			@RequestParam int patientId,
+			@RequestParam int mealId){
+		if (patientService.assignMeal(patientId, mealId)) {
+			logger.info("The meal is assigned successfully to the patient");
+			return new StringBuilder("redirect:/patient_get?patientId=")
+					.append(patientId).toString();
+		}		
+		
+		logger.error("Some error occured while meal assigning to the patient");
+		model.addAttribute("message", "errorOccured");
+		return "error/errorMessage";
+	}
+	
+	@PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+	@PostMapping("remove_patient_meal")
+	public String patientMealRemove(Model model,
+			@RequestParam int patientId,
+			@RequestParam int mealId){
+		if (patientService.removeMeal(patientId, mealId)) {
+			logger.info("The meal is removed successfully from the patient");
+			return new StringBuilder("redirect:/patient_get?patientId=")
+					.append(patientId).toString();
+		}		
+		
+		logger.error("Some error occured while meal removing from the patient");
+		model.addAttribute("message", "errorOccured");
+		return "error/errorMessage";
+	}
+	
+	@PreAuthorize("hasAuthority('ROLE_DOCTOR')")
+	@PostMapping("discharge_patient")
+	public String patientDischarge(Model model,
+			@RequestParam int patientId) {
+		if (patientService.dischargePatient(patientId)) {
+			logger.info("The patient is discharged successfully");
+			return new StringBuilder("redirect:/patient_get?patientId=")
+					.append(patientId).toString();
+		}
+		
+		logger.error("Some error occured while discharging the patient");
+		model.addAttribute("message", "errorOccured");
+		return "WEB-INF/errors/errorMessage.jsp";
 	}
 
 }

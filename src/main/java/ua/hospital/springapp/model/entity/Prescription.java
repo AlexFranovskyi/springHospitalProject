@@ -38,7 +38,7 @@ import lombok.Setter;
 public class Prescription {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private int id;
 	
 	@NotNull
@@ -56,6 +56,11 @@ public class Prescription {
 	
 	@ManyToOne(cascade = CascadeType.ALL)
 	private Patient patient;
+	
+	public void setPatient(Patient patient) {
+		patient.getPrescriptions().add(this);
+		this.patient = patient;
+	}
 
 	public enum PrescriptionType {
 		PROCEDURE, DRUGS, OPERATION

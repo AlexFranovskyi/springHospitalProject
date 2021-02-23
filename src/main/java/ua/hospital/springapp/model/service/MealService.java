@@ -7,7 +7,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import ua.hospital.springapp.model.dto.MealDto;
 import ua.hospital.springapp.model.entity.Meal;
@@ -30,19 +29,21 @@ public class MealService {
 		return false;
 	}
 	
-	@Transactional
 	public boolean updateMeal(Meal meal) {
 		if(mealRepository.updateMealById(meal.getId(), meal.getNameEn(), meal.getNameUk()) > 0) {
+			logger.info("The meal is updated");
 			return true;
 		}
+		logger.info("The meal is not updated");
 		return false;
 	}
 	
-	@Transactional
 	public boolean deleteMeal(int mealId) {
 		if(mealRepository.deleteMealById(mealId) > 0) {
+			logger.info("The meal is deleted");
 			return true;
 		}
+		logger.info("The meal is not deleted");
 		return false;
 	}
 	

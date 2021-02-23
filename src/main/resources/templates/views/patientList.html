@@ -34,7 +34,7 @@
 			      <td class="align-middle" th:text="${#temporals.format(patient.getPersonDto().birthDate, 'MM-dd-yyyy')}"></td>
 			      <td class="align-middle" th:text="${#temporals.format(patient.arriveDateTime, 'MM-dd-yyyy HH:mm')}"></td>
 			      
-			      <td class="align-middle" th:text="${patient.dischargeDateTime != null} ? ${#temporals.format(patient.dischargedDateTime, 'MM-dd-yyyy HH:mm')}
+			      <td class="align-middle" th:text="${patient.dischargeDateTime != null} ? ${#temporals.format(patient.dischargeDateTime, 'MM-dd-yyyy HH:mm')}
 			      			: #{notDischarged}"></td>
 			      			
 			      <td class="align-middle" th:with="diagnosis=${(#locale.toString()=='uk_UA') ? (patient.diagnosisUk) : (patient.diagnosisEn)}">
@@ -43,21 +43,21 @@
 			      
 				  <td class="align-middle" th:with="doctor=${patient.getDoctorDto()}">
 		    	  	<form sec:authorize="hasRole('ADMIN')" th:if="${doctor == null && patient.dischargeDateTime == null}" action="doctor_list" method="get">
-	           			<input type="hidden" name="patientId" value="${patient.id}">
+	           			<input type="hidden" name="patientId" th:value="${patient.id}">
 	        			<div class="form-group my-2">
 			            	<button type="submit" class="btn btn-primary" th:text="assignDoctor" ></button>
 		           		</div>
         			</form>
         			
 		    		<a sec:authorize="hasRole('ADMIN')" th:if="${doctor != null}" th:with="person=${doctor.getUserDto().getPersonDto()}"
-		    		 	th:href="@{/profile?userId=${doctor.id}&userRole=doctor"}>
+		    		 	th:href="@{/profile(userId=${doctor.id},userRole=DOCTOR)}">
 		    		 	<span th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' ' + person.firstNameUk} 
 							: ${person.lastNameEn + ' ' + person.firstNameEn}"></span>
 		    		 </a>
 			    		 
 				    <th:block th:if="${!#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
-				    	<span th:if="${doctor != null}" th:text="${#locale.toString()=='uk_UA'} ? ${person.lastNameUk + ' ' + person.firstNameUk} 
-								: ${person.lastNameEn + ' ' + person.firstNameEn}"></span>
+				    	<span th:if="${doctor != null}" th:text="${#locale.toString()=='uk_UA'} ? ${doctor.getUserDto().getPersonDto().lastNameUk + ' ' + getUserDto().getPersonDto().firstNameUk} 
+								: ${doctor.getUserDto().getPersonDto().lastNameEn + ' ' + doctor.getUserDto().getPersonDto().firstNameEn}"></span>
 						<span th:if="${doctor == null}" th:text="#{notAssigned}"></span> 
 				    </th:block>
 				    
@@ -69,7 +69,7 @@
 			
 			<div class="form-group row">
 				<div class="col">
-					<div th:if="${doctorId != null}" th:insert="views/parts/paginator :: pagination" th:with="extraParam=${doctorId}"></div>
+					<div th:if="${doctorId != null}" th:insert="views/parts/paginator :: pagination" th:with="extraParam=${doctorId},extraParamName='doctorId'"></div>
 					<div th:if="${doctorId == null}" th:insert="views/parts/paginator :: pagination"></div>
 				</div>
 				

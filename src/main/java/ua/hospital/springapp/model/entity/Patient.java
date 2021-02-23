@@ -66,9 +66,13 @@ public class Patient {
 	@OneToMany(mappedBy = "patient", fetch = FetchType.EAGER)
 	private List<Prescription> prescriptions;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.PERSIST)
 	@JoinTable(name = "patient_has_meal")
 	private Set<Meal> meals;
+	
+	public Patient(int id) {
+		this.id = id;
+	}
 	
 	@Override
 	public String toString() {

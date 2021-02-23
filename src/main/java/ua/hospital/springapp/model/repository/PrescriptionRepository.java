@@ -5,16 +5,16 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-import ua.hospital.springapp.model.entity.Meal;
+import ua.hospital.springapp.model.entity.Prescription;
 
-public interface MealRepository extends JpaRepository<Meal, Integer> {
-	
-	@Transactional
-	int deleteMealById(int id);
-	
-	@Transactional
+public interface PrescriptionRepository extends JpaRepository<Prescription, Integer> {
+		
 	@Modifying
-	@Query("UPDATE Meal m set m.nameEn = :nameEn, m.nameUk = :nameUk WHERE m.id = :id")
-	int updateMealById(int id, String nameEn, String nameUk);
+	@Transactional
+	@Query("UPDATE Prescription p set p.completionTime = CURRENT_TIMESTAMP WHERE p.id = :id")
+	int completePrescription(int id);
+	
+	@Transactional
+	int deletePrescriptionById(int id);
 
 }

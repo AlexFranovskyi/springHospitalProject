@@ -16,7 +16,8 @@
 	    		<a class="page-link" href="#" tabindex="-1">...</a>
     		</li>
     		<li th:if="${p - 1 != page.getNumber() && p != -1}"class="page-item">
-      			<a class="page-link" th:href="@{__${#httpServletRequest.requestURL}__(page=${p-1},sort=${page.getSort().iterator().next().getProperty()})}" tabindex="-1" th:text="${p}"></a>
+      			<a class="page-link" th:if="${extraParam != null}" th:href="@{__${#httpServletRequest.requestURL}__(page=${p-1},sort=${page.getSort().iterator().next().getProperty()},__${extraParamName} + '=' + ${extraParam}__)}" tabindex="-1" th:text="${p}"></a>
+      			<a class="page-link" th:if="${extraParam == null}" th:href="@{__${#httpServletRequest.requestURL}__(page=${p-1},sort=${page.getSort().iterator().next().getProperty()})}" tabindex="-1" th:text="${p}"></a>
     		</li>
    		</th:block>
    	</ul>

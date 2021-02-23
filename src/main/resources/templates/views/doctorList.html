@@ -58,7 +58,7 @@
 			      </td>
 			      
 			      <td class="align-middle" th:if="${action != null}">
-		      		<form th:if="${#authorization.expression('(hasRole(''ADMIN''))')}" action="assign_doctor" method="post">
+		      		<form th:if="${#authorization.expression('(hasRole(''ADMIN''))')}" th:action="assign_doctor" method="post">
 	           			<input type="hidden" name="patientId" th:value="${patientId}">
 	           			<input type="hidden" name="doctorId" th:value="${doctor.id}">
 	        			<div class="form-group my-2">
@@ -73,7 +73,7 @@
 	    
 		<div class="form-group row">		
 			<div class="col">
-				<div th:if="${patientId != null}" th:insert="views/parts/paginator :: pagination" th:with="extraParam=${patientId}"></div>
+				<div th:if="${patientId != null}" th:insert="views/parts/paginator :: pagination" th:with="extraParam=${patientId},extraParamName='patientId'"></div>
 				<div th:if="${patientId == null}" th:insert="views/parts/paginator :: pagination"></div>
 			</div>
 			

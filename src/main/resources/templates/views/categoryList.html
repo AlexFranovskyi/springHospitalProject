@@ -21,7 +21,7 @@
 		    	  <td class="align-middle" th:text="${(#locale.toString()=='uk_UA') ? category.nameUk : category.nameEn}"></td>
 			    
 				  <td class="align-middle" sec:authorize="hasRole('ADMIN')">
-				    	<div class="btn allign-top" role="group" th:if="${doctotId != null}">
+				    	<div class="btn allign-top" role="group" th:if="${doctorId != null}">
 				    	  	<form th:action="assign_category" method="post">
 			           			<input type="hidden" name="categoryId" th:value="${category.id}">
 			           			<input type="hidden" name="doctorId" th:value="${doctorId}">

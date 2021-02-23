@@ -30,7 +30,7 @@ public class CategoryController {
 			@RequestParam(required = false) Integer doctorId) {
 		
 		if(Optional.ofNullable(doctorId).isPresent()) {
-			model.addAttribute("doctorId", doctorId);
+			model.addAttribute("doctorId", doctorId.intValue());
 			model.addAttribute("message", "categoryAssigning");
 			logger.info("List is formed to assign a category to the doctor");
 		}

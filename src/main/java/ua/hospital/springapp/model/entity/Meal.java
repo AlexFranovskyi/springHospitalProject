@@ -43,6 +43,11 @@ public class Meal {
 	@NotNull
 	private String nameUk;
 	
+	public Meal(String nameEn, String nameUk) {
+		this.nameEn = nameEn;
+		this.nameUk = nameUk;
+	}
+	
 	@Override
 	public String toString() {
 		return new StringBuilder("id: ")
@@ -63,5 +68,6 @@ public class Meal {
 		}
 		return super.equals(obj);
 	}
+
 
 }

@@ -28,13 +28,12 @@ public class DoctorService {
 	
 	public boolean createDoctor(Doctor doctor) {
 		doctor.getUser().setPassword(passwordEncoder.encode(doctor.getUser().getPassword()));
-		try {
-			doctorRepository.save(doctor);
-		} catch(IllegalArgumentException ex) {
-			logger.info("attempt to register doctor under existing user login");
-			return false;
+		if(doctorRepository.save(doctor).getId() > 0) {
+			logger.info("New doctor is saved");
+			return true;
 		}
-		return true;
+		logger.info("New doctor is not saved");
+		return false;
 	}
 	
 	public Optional<DoctorDto> findByUserUsername(String username){

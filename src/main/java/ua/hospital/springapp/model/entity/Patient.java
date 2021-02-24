@@ -51,11 +51,9 @@ public class Patient {
 	@Column(insertable = false, updatable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private LocalDateTime arriveDateTime;
-	
-	@NotNull
+
 	private String diagnosisEn;
-	
-	@NotNull
+
 	private String diagnosisUk;
 	
 	private LocalDateTime dischargeDateTime;

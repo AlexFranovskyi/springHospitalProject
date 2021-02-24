@@ -33,13 +33,12 @@ public class UserService implements UserDetailsService{
 	
 	public boolean createUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		try {
-			userRepository.save(user);
-		} catch(IllegalArgumentException ex) {
-			logger.info("attempt to register user under existing login");
-			return false;
+		if (userRepository.save(user).getId() > 0) {
+			logger.info("New user is saved");
+			return true;
 		}
-		return true;
+		logger.info("New user is not saved");
+		return false;
 	}
 	
 	public Optional<UserDto> findByUsername(String username){
